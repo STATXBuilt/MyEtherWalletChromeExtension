@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Racer X v6 Wallet Analyzer</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 1rem auto;
+    padding: 1rem;
+    background: #f9f9f9;
+  }
+  h1 {
+    text-align: center;
+  }
+  input[type="text"] {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 1.1rem;
+    background-color: #0066ff;
+    border: none;
+    color: white;
+    cursor: pointer;
+  }
+  button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+  }
+  .output {
+    margin-top: 1.5rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 0 5px #ccc;
+  }
+  .section {
+    margin-bottom: 1rem;
+  }
+  .section h2 {
+    margin-bottom: 0.5rem;
+    color: #004aad;
+  }
+  pre {
+    background: #eee;
+    padding: 0.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+</style>
+</head>
+<body>
+
+<h1>Racer X v6 Wallet Analyzer</h1>
+
+<input type="text" id="walletInput" placeholder="Enter wallet address here" autocomplete="off" />
+<button id="analyzeBtn">Analyze Wallet</button>
+
+<div id="result" class="output" style="display:none;"></div>
+
+<script>
+  // Your Eraser X v6 config object (dynamic walletAddress will be injected)
+  const baseConfig = {
+    version: "6.0",
+    modules: {
+      search: {
+        type: "deep_scan",
+        targets: ["wallets", "contracts", "vaults", "staked_tokens", "lp_positions", "wrapped_assets"],
+        chains: ["Ethereum", "Polygon", "Avalanche", "BSC", "Arbitrum", "Optimism"],
+        resolveWrapped: true,
+        resolveStaked: true,
+        filters: ["active", "derivatives", "yield"]
+      },
+      securities: {
+        trackTokens: ["AAVE", "UNI", "LDO", "MKR", "CRV", "COMP"],
+        riskAnalysis: true,
+        exposureBreakdown: true,
+        vaultLockStatus: true
+      },
+      recovery: {
+        autoDetect: true,
+        tagLostFunds: true,
+        traceTokens: ["STETH", "WBETH", "RSV", "YFI"],
+        deepWalletGraph: true
+      },
+      defiTVL: {
+        trackProtocols: ["AAVE", "Lido", "Curve", "Uniswap", "Balancer"],
+        tvlBreakdown: true,
+        perChain: true
+      }
+    },
+    outputFormat: "rich_summary",
+    integration: {
+      Etherscan: true,
+      DeBank: true,
+      Zapper: true,
+      Llama: true,
+      LidoOracle: true
+    },
+    refreshInterval: "daily"
+  };
+
+  const walletInput = document.getElementById("walletInput");
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  const resultDiv = document.getElementById("result");
+
+  analyzeBtn.addEventListener("click", () => {
+    const walletAddress = walletInput.value.trim();
+
+    // Basic wallet address validation (very simple check)
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      alert("Please enter a valid Ethereum-style wallet address.");
+      return;
+    }
+
+    analyzeBtn.disabled = true;
+    resultDiv.style.display = "block";
+    resultDiv.innerHTML = "<p>Analyzing wallet: <b>" + walletAddress + "</b>...</p>";
+
+    // Inject the dynamic wallet address into the config
+    const configWithWallet = {
+      ...baseConfig,
+      walletAddressInput: walletAddress  // custom param for your internal use
+    };
+
+    // Here you would call your backend API or services that process
+    // the configWithWallet and fetch data from Etherscan, DeBank, etc.
+
+    // For demo: simulate async fetch with timeout
+    setTimeout(() => {
+      // Simulated output: replace with real API call results
+      const simulatedOutput = `
+        <div class="section">
+          <h2>Search Module Results</h2>
+          <pre>Detected vaults: 3
+Staked tokens: AAVE, UNI
+Wrapped assets: WETH, stETH
+LP Positions: Uniswap V3 Pool #12345
+Filters applied: active, derivatives, yield</pre>
+        </div>
+        <div class="section">
+          <h2>Securities Analysis</h2>
+          <pre>Tracked tokens: AAVE, UNI, LDO, MKR, CRV, COMP
+Risk Level: Medium
+Exposure Breakdown:
+- DeFi: 40%
+- Lending: 25%
+- Yield Farming: 35%
+Vault Lock Status: Secure</pre>
+        </div>
+        <div class="section">
+          <h2>Recovery Insights</h2>
+          <pre>Lost funds tagged: Yes
+Tokens traced: STETH, WBETH, RSV, YFI
+Deep Wallet Graph: Generated</pre>
+        </div>
+        <div class="section">
+          <h2>DeFi TVL Breakdown</h2>
+          <pre>
+Protocol TVL (USD):
+- AAVE: $12,500
+- Lido: $8,300
+- Curve: $5,400
+- Uniswap: $6,700
+- Balancer: $3,200
+
+Chains tracked: Ethereum, Polygon, Avalanche, BSC, Arbitrum, Optimism
+          </pre>
+        </div>
+        <div class="section">
+          <small><i>Data refreshed daily via integrations with Etherscan, DeBank, Zapper, Llama, and LidoOracle.</i></small>
+        </div>
+      `;
+      resultDiv.innerHTML += simulatedOutput;
+      analyzeBtn.disabled = false;
+    }, 1500);
+  });
+
+  // Optional: Enter key triggers analyze button
+  walletInput.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") analyzeBtn.click();
+  });
+</script>
+
+</body>
+</html>
